@@ -7,9 +7,11 @@ import multiprocessing
 from copy import deepcopy
 
 
-NO_OF_SPECIES = 100
-NO_OF_GENE = 100
-MUTATION_CHANCE = 0.02
+NO_OF_SPECIES = 200
+NO_OF_GENE = 200
+MUTATION_CHANCE = 0.05
+ADD_GENE_CHANCE = 0.03
+REM_GENE_CHANCE = 0.02
 
 
 #Checking if the image file exists or not
@@ -29,28 +31,30 @@ class Point:
         self.y = y
 
 class Color:
-    def __init__(self, r, g, b):
+    def __init__(self, r, g, b, a):
         self.r = r
         self.g = g
         self.b = b
+        self.a = a
+
 
 class Gene:
     def __init__(self, size):
         self.size = size
-        self.diameter = random.randint(2, 15)
+        self.diameter = random.randint(5, 30)
         self.pos = Point(random.randint(0, self.size[0]), random.randint(0, self.size[1]))
-        self.color = Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        self.color = Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), random.randint(155, 255))
         self.paras = ['diameter', 'position', 'color']
 
     def mutate(self):
         mutate_type = random.choice(self.paras)
 
         if mutate_type == 'diameter':
-            self.diameter = random.randint(2, 15)
+            self.diameter = random.randint(5, 30)
         elif mutate_type == 'position':
             self.pos = Point(random.randint(0, self.size[0]), random.randint(0, self.size[1]))
         elif mutate_type == 'color':
-            self.color = Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            self.color = Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), random.randint(155, 255))
 
 
 class Organism:
@@ -62,15 +66,19 @@ class Organism:
         for g in self.organism:
             if MUTATION_CHANCE > random.random():
                 g.mutate()
+            if ADD_GENE_CHANCE > random.random():
+                self.organism.append(Gene(self.size))
+            if len(self.organism) > 0 and REM_GENE_CHANCE > random.random():
+                self.organism.remove(random.choice(self.organism))
 
     def draw_image(self):
         image = Image.new("RGB", self.size, (255, 255, 255))
-        canvas = ImageDraw.Draw(image, 'RGB')
+        canvas = ImageDraw.Draw(image, 'RGBA')
         for g in self.organism:
-            color = (g.color.r, g.color.g, g.color.b)
+            color = (g.color.r, g.color.g, g.color.b, g.color.a)
             canvas.ellipse([g.pos.x - g.diameter, g.pos.y - g.diameter, g.pos.x + g.diameter, g.pos.y + g.diameter],
-                           outline=color, fill=color)
-            return image
+                           outline=None, fill=color)
+        return image
 
 
 def calcfitness(i1, i2):
@@ -93,7 +101,7 @@ def run():
     parent = Organism(target.size)
     score = calcfitness(parent.draw_image(), target)
 
-    p = multiprocessing.Pool(2)
+    p = multiprocessing.Pool(3)
 
     while True:
         print("Genreation {}- {}".format(generation, score))
@@ -133,7 +141,6 @@ def mutateandgo(o):
 
 def groupmutate(o, number, p):
     results = p.map(mutateandgo, [o]*int(number))
-    #results = [mutateandgo(i) for i in [o]*int(number)]
     return results
 
 if __name__ == '__main__':
