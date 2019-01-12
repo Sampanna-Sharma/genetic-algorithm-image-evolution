@@ -8,5 +8,5 @@ Mutation chance is 2%.
 ### Reference Image
 ![Output](https://github.com/Sampanna-Sharma/genetic-algorithm-image-evolution/blob/master/reference.png)
 
-### Outcome of 1850 generation
-![Output](https://github.com/Sampanna-Sharma/genetic-algorithm-image-evolution/blob/master/1850.png)
+### Outcome of 18350 generation
+![Output](https://github.com/Sampanna-Sharma/genetic-algorithm-image-evolution/blob/master/18350.png)
